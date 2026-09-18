@@ -5,6 +5,7 @@ import { Building2, ShieldCheck, Heart, Users, GraduationCap, CheckCircle } from
 export const TentangKamiSection: React.FC = () => {
   return (
     <section id="tentang-kami" className="py-20 bg-white dark:bg-[#1C0A26] relative overflow-hidden transition-colors">
+      <div id="tentang" className="sr-only" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}

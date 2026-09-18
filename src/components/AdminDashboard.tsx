@@ -127,6 +127,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
 
+  const handleExportCSV = async () => {
+    try {
+      const res = await fetch('/api/ppdb/export/csv');
+      if (!res.ok) throw new Error('Failed to export CSV');
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `PPDB_BaitulQuran_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }, 200);
+    } catch (err) {
+      console.error('Export CSV error', err);
+      window.location.href = '/api/ppdb/export/csv';
+    }
+  };
+
   // Filtered List
   const filteredApplicants = applicants.filter((a) => {
     const q = searchQuery.toLowerCase();
@@ -230,13 +251,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <span>Refresh</span>
             </button>
 
-            <a
-              href="/api/ppdb/export/csv"
+            <button
+              onClick={handleExportCSV}
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#64157D] to-[#C218A8] hover:opacity-90 shadow-sm transition cursor-pointer"
+              title="Unduh rekapitulasi data pendaftar format CSV/Excel"
             >
               <Download className="w-4 h-4" />
               <span>Export CSV</span>
-            </a>
+            </button>
           </div>
         </div>
 

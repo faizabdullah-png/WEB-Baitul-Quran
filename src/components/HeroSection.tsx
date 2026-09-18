@@ -11,7 +11,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onLearnMoreClick,
 }) => {
   const handleLearnMore = onLearnMoreClick || (() => {
-    const el = document.getElementById('tentang');
+    const el = document.getElementById('program') || document.getElementById('tentang-kami') || document.getElementById('tentang');
     el?.scrollIntoView({ behavior: 'smooth' });
   });
   return (

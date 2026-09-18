@@ -16,6 +16,7 @@ export const KegiatanSantriSection: React.FC<KegiatanSantriSectionProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [activePreview, setActivePreview] = useState<GalleryItem | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [photoToDelete, setPhotoToDelete] = useState<string | null>(null);
 
   // Form states for adding photo
   const [photoTitle, setPhotoTitle] = useState('');
@@ -136,7 +137,7 @@ export const KegiatanSantriSection: React.FC<KegiatanSantriSectionProps> = ({
                   </button>
                   {onDeletePhoto && (
                     <button
-                      onClick={() => onDeletePhoto(item.id)}
+                      onClick={() => setPhotoToDelete(item.id)}
                       className="p-2 rounded-xl bg-red-600/90 text-white hover:bg-red-700 transition-colors cursor-pointer shadow"
                       title="Hapus Foto"
                     >
@@ -277,6 +278,44 @@ export const KegiatanSantriSection: React.FC<KegiatanSantriSectionProps> = ({
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Konfirmasi Hapus Foto */}
+        {photoToDelete && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+            <div className="bg-white dark:bg-[#250D33] rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-purple-100 dark:border-purple-900 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 flex items-center justify-center mx-auto mb-4">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <h3 className="text-base font-bold text-neutral-900 dark:text-white mb-2">
+                Hapus Foto Kegiatan?
+              </h3>
+              <p className="text-xs text-neutral-600 dark:text-neutral-300 mb-6 leading-relaxed">
+                Foto ini akan dihapus dari dokumentasi kegiatan santriwati.
+              </p>
+              <div className="flex gap-3 justify-center">
+                <button
+                  type="button"
+                  onClick={() => setPhotoToDelete(null)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onDeletePhoto && photoToDelete) {
+                      onDeletePhoto(photoToDelete);
+                    }
+                    setPhotoToDelete(null);
+                  }}
+                  className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-red-600 hover:bg-red-700 shadow transition cursor-pointer"
+                >
+                  Ya, Hapus
+                </button>
+              </div>
             </div>
           </div>
         )}

@@ -91,10 +91,16 @@ export const FormPPDBOnline: React.FC<FormPPDBOnlineProps> = ({
     if (errorMessage) setErrorMessage(null);
   };
 
-  // Mock document file upload reader
+  // Document file upload reader with 5MB limit
   const handleFileUpload = (fieldName: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setErrorMessage(`File ${file.name} melebihi batas 5MB. Silakan gunakan file gambar/PDF yang lebih kecil.`);
+        e.target.value = '';
+        return;
+      }
+      setErrorMessage(null);
       const reader = new FileReader();
       reader.onloadend = () => {
         setFormData((prev) => ({
@@ -338,6 +344,7 @@ export const FormPPDBOnline: React.FC<FormPPDBOnlineProps> = ({
               onClick={() => {
                 setSubmittedData(null);
                 setCurrentStep(1);
+                setMaxStepReached(1);
                 setFormData({
                   namaLengkap: '',
                   namaPanggilan: '',

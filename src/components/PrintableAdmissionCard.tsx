@@ -13,7 +13,96 @@ export const PrintableAdmissionCard: React.FC<PrintableAdmissionCardProps> = ({
   onClose,
 }) => {
   const handlePrint = () => {
-    window.print();
+    try {
+      window.print();
+    } catch (e) {
+      console.error('Print failed', e);
+      handleDownloadHtml();
+    }
+  };
+
+  const handleDownloadHtml = () => {
+    const htmlContent = `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>Kartu_Pendaftaran_${applicant.registrationId}</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 24px; color: #222; background: #fff; }
+    .card { border: 2px solid #64157D; border-radius: 16px; padding: 28px; max-width: 680px; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .header { border-bottom: 2px solid #64157D; padding-bottom: 16px; margin-bottom: 20px; }
+    .foundation { font-size: 11px; font-weight: bold; color: #FF8500; text-transform: uppercase; letter-spacing: 0.05em; }
+    h2 { color: #43104F; margin: 4px 0; font-size: 22px; font-weight: 800; }
+    .sub { font-size: 13px; color: #555; }
+    .contact { font-size: 11px; color: #777; margin-top: 4px; }
+    .title-box { text-align: center; margin: 20px 0; }
+    .title-box h3 { color: #43104F; margin: 0 0 8px 0; font-size: 16px; letter-spacing: 0.03em; }
+    .reg-badge { display: inline-block; background: #f3e8ff; color: #64157D; padding: 6px 16px; border-radius: 9999px; font-weight: 800; font-size: 14px; border: 1px solid #d8b4fe; }
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+    td { padding: 8px 10px; border-bottom: 1px solid #eee; }
+    td.label { color: #666; width: 35%; font-weight: 500; }
+    td.val { font-weight: 600; color: #222; }
+    .instructions { background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 12px; padding: 14px; font-size: 12px; color: #555; margin-top: 20px; line-height: 1.6; }
+    .instructions strong { color: #64157D; display: block; margin-bottom: 6px; }
+    .footer { margin-top: 24px; padding-top: 16px; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: flex-end; font-size: 12px; }
+    @media print { body { margin: 0; } .card { box-shadow: none; border-width: 2px; } }
+  </style>
+</head>
+<body onload="window.print()">
+  <div class="card">
+    <div class="header">
+      <div class="foundation">${INSTITUTION_CONFIG.foundation}</div>
+      <h2>${INSTITUTION_CONFIG.name}</h2>
+      <div class="sub">Pendidikan Islam Khusus Santri Putri Tingkat SMP & SMA/PKBM</div>
+      <div class="contact">${INSTITUTION_CONFIG.address} • Telp: ${INSTITUTION_CONFIG.contacts[0].number}</div>
+    </div>
+    <div class="title-box">
+      <h3>KARTU BUKTI PENDAFTARAN SANTRI BARU (PPDB 2027/2028)</h3>
+      <div class="reg-badge">No. Registrasi: ${applicant.registrationId}</div>
+    </div>
+    <table>
+      <tr><td class="label">Nama Lengkap Santriwati</td><td class="val">${applicant.namaLengkap}</td></tr>
+      <tr><td class="label">Nama Panggilan</td><td class="val">${applicant.namaPanggilan || '-'}</td></tr>
+      <tr><td class="label">Jenjang Pilihan</td><td class="val" style="color: #C218A8;">${applicant.jenjang}</td></tr>
+      <tr><td class="label">NIK / NISN</td><td class="val">${applicant.nik} / ${applicant.nisn || '-'}</td></tr>
+      <tr><td class="label">Tempat, Tanggal Lahir</td><td class="val">${applicant.tempatLahir}, ${applicant.tanggalLahir}</td></tr>
+      <tr><td class="label">Asal Sekolah</td><td class="val">${applicant.asalSekolah || '-'}</td></tr>
+      <tr><td class="label">Hafalan Al-Qur'an</td><td class="val">${applicant.hafalJuz30} (${applicant.hafalanQuran || 'Juz 30'})</td></tr>
+      <tr><td class="label">Nama Ayah / Ibu</td><td class="val">${applicant.namaAyah} / ${applicant.namaIbu}</td></tr>
+      <tr><td class="label">WhatsApp Orang Tua/Wali</td><td class="val">${applicant.noWhatsAppOrangTua || applicant.noWhatsApp}</td></tr>
+      <tr><td class="label">Tanggal Pendaftaran</td><td class="val">${applicant.tanggalDaftar}</td></tr>
+      <tr><td class="label">Status Berkas</td><td class="val">${applicant.statusPendaftaran}</td></tr>
+    </table>
+    <div class="instructions">
+      <strong>Catatan Untuk Calon Wali Santri:</strong>
+      1. Simpan kartu bukti pendaftaran ini.<br>
+      2. Konfirmasikan nomor registrasi kepada Admin PPDB via WhatsApp resmi (+62 812-8522-0164).<br>
+      3. Tes seleksi membaca Al-Qur'an dan wawancara akan dijadwalkan oleh panitia.
+    </div>
+    <div class="footer">
+      <div>
+        <small style="color: #888;">Dokumen Resmi PPDB BQN</small><br>
+        <strong>VERIFIED BQN-PPDB</strong>
+      </div>
+      <div style="text-align: right;">
+        <div>Cilegon, ${applicant.tanggalDaftar}</div>
+        <div style="font-weight: 600; margin-top: 4px;">Panitia PPDB Baitul Qur’an Dzun Nurain</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Kartu_Pendaftaran_${applicant.registrationId}.html`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    }, 200);
   };
 
   return (
@@ -33,10 +122,19 @@ export const PrintableAdmissionCard: React.FC<PrintableAdmissionCardProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#64157D] hover:bg-[#43104F] transition shadow-sm cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-[#64157D] hover:bg-[#43104F] transition shadow-sm cursor-pointer"
+              title="Cetak langsung menggunakan printer atau simpan PDF"
             >
               <Printer className="w-4 h-4" />
               <span>Cetak / PDF</span>
+            </button>
+            <button
+              onClick={handleDownloadHtml}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-[#64157D] bg-purple-100 hover:bg-purple-200 transition shadow-sm cursor-pointer"
+              title="Unduh file kartu bukti pendaftaran ke perangkat"
+            >
+              <Download className="w-4 h-4" />
+              <span>Unduh File</span>
             </button>
             <button
               onClick={onClose}

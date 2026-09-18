@@ -21,7 +21,7 @@ export const Footer: React.FC<FooterProps> = ({ onAdminClick }) => {
           
           {/* Col 1: Identity */}
           <div className="lg:col-span-5 space-y-4">
-            <BrandLogo />
+            <BrandLogo inverted={true} />
             <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed max-w-sm pt-2">
               Lembaga pendidikan Islam khusus putri yang menyelenggarakan pendidikan tingkat SMP dan SMA melalui program PKBM. Berbasis hafalan Al-Qur'an dan ilmu syar'iyyah sesuai pemahaman salafush shalih.
             </p>
@@ -39,10 +39,13 @@ export const Footer: React.FC<FooterProps> = ({ onAdminClick }) => {
             </h4>
             <ul className="space-y-2 text-xs sm:text-sm text-neutral-400">
               <li>
-                <a href="#tentang" className="hover:text-[#FFB800] transition">Tentang Kami</a>
+                <a href="#tentang-kami" className="hover:text-[#FFB800] transition">Tentang Kami</a>
               </li>
               <li>
                 <a href="#program" className="hover:text-[#FFB800] transition">Program Unggulan</a>
+              </li>
+              <li>
+                <a href="#kurikulum" className="hover:text-[#FFB800] transition">Kurikulum Terpadu</a>
               </li>
               <li>
                 <a href="#fasilitas" className="hover:text-[#FFB800] transition">Fasilitas Asrama</a>
@@ -54,10 +57,10 @@ export const Footer: React.FC<FooterProps> = ({ onAdminClick }) => {
                 <a href="#ppdb" className="hover:text-[#FFB800] transition">Alur & Syarat PPDB</a>
               </li>
               <li>
-                <a href="#faq" className="hover:text-[#FFB800] transition">Tanya Jawab (FAQ)</a>
+                <a href="#biaya" className="hover:text-[#FFB800] transition">Estimasi Biaya</a>
               </li>
               <li>
-                <a href="#lokasi" className="hover:text-[#FFB800] transition">Lokasi & Denah</a>
+                <a href="#kontak" className="hover:text-[#FFB800] transition">Kontak & Lokasi</a>
               </li>
             </ul>
           </div>

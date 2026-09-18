@@ -8,7 +8,7 @@ interface PersyaratanSectionProps {
 
 export const PersyaratanSection: React.FC<PersyaratanSectionProps> = ({ onRegisterClick }) => {
   return (
-    <section className="py-20 bg-white dark:bg-[#1C0A26] relative overflow-hidden transition-colors">
+    <section id="persyaratan" className="py-20 bg-white dark:bg-[#1C0A26] relative overflow-hidden transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
