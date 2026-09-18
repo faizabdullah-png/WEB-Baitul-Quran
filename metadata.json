@@ -1,0 +1,6 @@
+{
+  "name": "Baitul Qur’an Dzun Nurain Lil Banaat",
+  "description": "Website resmi lembaga pendidikan Islam khusus putri tingkat SMP dan SMA/PKBM di Cilegon dengan fokus Al-Qur’an, hafalan, ilmu syar’iyyah, dan sistem PPDB online.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
