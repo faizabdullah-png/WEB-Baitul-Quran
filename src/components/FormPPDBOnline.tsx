@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { PendaftarPPDB, JenjangPendidikan } from '../types';
 import { INSTITUTION_CONFIG } from '../data/initialData';
+import { savePPDBApplicant } from '../data/ppdbStorage';
 import {
   User,
   Users,
@@ -200,26 +201,8 @@ export const FormPPDBOnline: React.FC<FormPPDBOnlineProps> = ({
     };
 
     try {
-      // POST to backend API
-      const response = await fetch('/api/ppdb', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Gagal mengirim pendaftaran');
-      }
-
-      const result: PendaftarPPDB = await response.json();
-      setSubmittedData(result);
-      onSubmitSuccess(result);
-    } catch (err: any) {
-      console.warn('API submission notice:', err.message);
-      // Fallback local persistence if server is briefly disconnected
       const count = Math.floor(Math.random() * 900) + 10;
-      const fallbackResult: PendaftarPPDB = {
+      const applicantToSave: PendaftarPPDB = {
         id: `reg-${Date.now()}`,
         registrationId: `BQN-2027-${String(count).padStart(5, '0')}`,
         namaLengkap: payload.namaLengkap,
@@ -254,8 +237,12 @@ export const FormPPDBOnline: React.FC<FormPPDBOnlineProps> = ({
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      setSubmittedData(fallbackResult);
-      onSubmitSuccess(fallbackResult);
+
+      const result = await savePPDBApplicant(applicantToSave);
+      setSubmittedData(result);
+      onSubmitSuccess(result);
+    } catch (err: any) {
+      console.error('Submission error:', err);
     } finally {
       setIsSubmitting(false);
     }

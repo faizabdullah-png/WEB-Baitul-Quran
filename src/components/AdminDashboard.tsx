@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { PendaftarPPDB, StatusPendaftaran, PPDBStats, JenjangPendidikan } from '../types';
 import {
+  fetchPPDBApplicants,
+  updatePPDBApplicantStatus,
+  deletePPDBApplicant,
+  computeStats,
+  exportApplicantsToCSV,
+} from '../data/ppdbStorage';
+import {
   ShieldCheck,
   Search,
   Filter,
@@ -26,14 +33,14 @@ import {
 interface AdminDashboardProps {
   onBackToWeb: () => void;
   onOpenPrintModal: (applicant: PendaftarPPDB) => void;
-  darkMode?: boolean;
-  onToggleDarkMode?: () => void;
+  darkMode: boolean;
+  onToggleDarkMode: () => void;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onBackToWeb,
   onOpenPrintModal,
-  darkMode = false,
+  darkMode,
   onToggleDarkMode,
 }) => {
   const [applicants, setApplicants] = useState<PendaftarPPDB[]>([]);
@@ -54,16 +61,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const fetchApplicants = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/ppdb');
-      if (res.ok) {
-        const data = await res.json();
-        setApplicants(data);
-      }
-      const statsRes = await fetch('/api/ppdb/stats');
-      if (statsRes.ok) {
-        const s = await statsRes.json();
-        setStats(s);
-      }
+      const data = await fetchPPDBApplicants();
+      setApplicants(data);
+      setStats(computeStats(data));
     } catch (err) {
       console.error('Failed to load PPDB data', err);
     } finally {
@@ -78,23 +78,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const handleUpdateStatus = async (id: string, newStatus: StatusPendaftaran) => {
     setIsUpdatingStatus(true);
     try {
-      const res = await fetch(`/api/ppdb/${id}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ statusPendaftaran: newStatus, status: newStatus }),
-      });
-
-      if (res.ok) {
-        const updated: PendaftarPPDB = await res.json();
-        setApplicants((prev) => prev.map((a) => (a.id === id ? updated : a)));
+      const updated = await updatePPDBApplicantStatus(id, newStatus);
+      if (updated) {
+        setApplicants((prev) => {
+          const next = prev.map((a) => (a.id === id ? updated : a));
+          setStats(computeStats(next));
+          return next;
+        });
         if (selectedApplicant && selectedApplicant.id === id) {
           setSelectedApplicant(updated);
         }
-        // Refresh stats
-        fetch('/api/ppdb/stats')
-          .then((r) => r.json())
-          .then((s) => setStats(s))
-          .catch(() => {});
       }
     } catch (err) {
       console.error('Failed to update status', err);
@@ -107,19 +100,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     if (!deleteTarget) return;
     setIsDeleting(true);
     try {
-      const res = await fetch(`/api/ppdb/${deleteTarget.id}`, { method: 'DELETE' });
-      if (res.ok) {
-        setApplicants((prev) => prev.filter((a) => a.id !== deleteTarget.id));
-        if (selectedApplicant && selectedApplicant.id === deleteTarget.id) {
-          setSelectedApplicant(null);
-        }
-        setDeleteTarget(null);
-        // Refresh stats
-        fetch('/api/ppdb/stats')
-          .then((r) => r.json())
-          .then((s) => setStats(s))
-          .catch(() => {});
+      await deletePPDBApplicant(deleteTarget.id);
+      setApplicants((prev) => {
+        const next = prev.filter((a) => a.id !== deleteTarget.id);
+        setStats(computeStats(next));
+        return next;
+      });
+      if (selectedApplicant && selectedApplicant.id === deleteTarget.id) {
+        setSelectedApplicant(null);
       }
+      setDeleteTarget(null);
     } catch (err) {
       console.error('Failed to delete applicant', err);
     } finally {
@@ -127,25 +117,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
 
-  const handleExportCSV = async () => {
-    try {
-      const res = await fetch('/api/ppdb/export/csv');
-      if (!res.ok) throw new Error('Failed to export CSV');
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `PPDB_BaitulQuran_${new Date().toISOString().slice(0, 10)}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => {
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      }, 200);
-    } catch (err) {
-      console.error('Export CSV error', err);
-      window.location.href = '/api/ppdb/export/csv';
-    }
+  const handleExportCSV = () => {
+    exportApplicantsToCSV(applicants);
   };
 
   // Filtered List
