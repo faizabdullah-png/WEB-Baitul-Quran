@@ -106,6 +106,8 @@ export default function App() {
         <AdminDashboard
           onBackToWeb={() => setCurrentView('landing')}
           onOpenPrintModal={(applicant) => setPrintApplicant(applicant)}
+          darkMode={darkMode}
+          onToggleDarkMode={toggleDarkMode}
         />
       ) : (
         /* Landing Page View */

@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { INSTITUTION_CONFIG } from '../data/initialData';
-import { MessageSquare, PhoneCall, Send, Sparkles, CheckCircle2 } from 'lucide-react';
+import { MessageSquare, PhoneCall, Send, Sparkles, CheckCircle2, ExternalLink } from 'lucide-react';
 
 export const KontakSection: React.FC = () => {
   const [namaPengirim, setNamaPengirim] = useState('');
   const [pesanTanya, setPesanTanya] = useState('');
   const [selectedAdminIndex, setSelectedAdminIndex] = useState(0);
   const [isSent, setIsSent] = useState(false);
+  const [generatedWaUrl, setGeneratedWaUrl] = useState<string | null>(null);
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,7 +20,21 @@ export const KontakSection: React.FC = () => {
     );
 
     const waUrl = `https://wa.me/${chosenContact.clean}?text=${fullText}`;
-    window.open(waUrl, '_blank');
+    setGeneratedWaUrl(waUrl);
+
+    // Safely trigger navigation without getting blocked by iframe popup restrictions
+    try {
+      const link = document.createElement('a');
+      link.href = waUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch {
+      window.location.href = waUrl;
+    }
+
     setIsSent(true);
     setPesanTanya('');
   };
@@ -49,39 +64,39 @@ export const KontakSection: React.FC = () => {
             const defaultText = encodeURIComponent(
               `Assalamu'alaikum Warahmatullahi Wabarakatuh,\nPanitia PPDB Baitul Qur'an Dzun Nurain Lil Banaat,\nSaya ingin menanyakan informasi seputar penerimaan santri baru putri.`
             );
-            const directUrl = `https://wa.me/${contact.clean}?text=${defaultText}`;
+            const directWa = `https://wa.me/${contact.clean}?text=${defaultText}`;
 
             return (
               <div
                 key={contact.number}
-                className="p-6 rounded-3xl bg-white dark:bg-[#250D33] border border-purple-100 dark:border-purple-900/50 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between"
+                className="p-6 rounded-3xl bg-white dark:bg-[#250D33] border border-purple-100 dark:border-purple-900/50 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 flex items-center justify-center">
-                      <MessageSquare className="w-6 h-6" />
-                    </div>
-                    <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider">
-                      Layanan #{idx + 1}
+                    <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-pink-50 dark:bg-pink-950/50 text-[#C218A8] dark:text-pink-300 border border-pink-100 dark:border-pink-900">
+                      Layanan {idx + 1}
                     </span>
+                    <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 flex items-center justify-center">
+                      <MessageSquare className="w-4 h-4" />
+                    </div>
                   </div>
 
-                  <h3 className="text-base font-bold text-[#43104F] dark:text-white mb-1">
+                  <h3 className="font-bold text-base text-[#43104F] dark:text-white mb-1">
                     {contact.label}
                   </h3>
-                  <p className="text-lg font-extrabold font-mono text-[#64157D] dark:text-purple-300 mb-4">
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-4 font-mono font-medium">
                     {contact.number}
                   </p>
                 </div>
 
                 <a
-                  href={directUrl}
+                  href={directWa}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#25D366] hover:bg-[#20ba59] shadow transition cursor-pointer"
+                  className="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition shadow-sm cursor-pointer"
                 >
                   <MessageSquare className="w-4 h-4" />
-                  <span>Chat WhatsApp Langsung</span>
+                  <span>Chat WhatsApp</span>
                 </a>
               </div>
             );
@@ -121,7 +136,7 @@ export const KontakSection: React.FC = () => {
               <select
                 value={selectedAdminIndex}
                 onChange={(e) => setSelectedAdminIndex(Number(e.target.value))}
-                className="w-full px-3.5 py-2.5 rounded-xl text-sm border border-purple-200 dark:border-purple-800 bg-neutral-50 dark:bg-[#1A0A24] text-[#43104F] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#C218A8]"
+                className="w-full px-3.5 py-2.5 rounded-xl text-sm border border-purple-200 dark:border-purple-800 bg-neutral-50 dark:bg-[#1A0A24] text-[#43104F] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#C218A8] cursor-pointer"
               >
                 {INSTITUTION_CONFIG.contacts.map((c, i) => (
                   <option key={c.number} value={i}>
@@ -146,9 +161,22 @@ export const KontakSection: React.FC = () => {
             </div>
 
             {isSent && (
-              <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 text-xs text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 shrink-0" />
-                <span>Pesan telah diteruskan ke WhatsApp Admin. Silakan lanjutkan percakapan di aplikasi WhatsApp Anda.</span>
+              <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-700 dark:text-emerald-300 space-y-2">
+                <div className="flex items-center gap-2 font-semibold">
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+                  <span>Pesan siap diteruskan ke WhatsApp Admin.</span>
+                </div>
+                {generatedWaUrl && (
+                  <a
+                    href={generatedWaUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-[#C218A8] dark:text-[#FFB800] font-bold underline"
+                  >
+                    <span>Klik di sini jika WhatsApp belum terbuka otomatis</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                )}
               </div>
             )}
 

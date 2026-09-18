@@ -28,6 +28,7 @@ export const FormPPDBOnline: React.FC<FormPPDBOnlineProps> = ({
   onOpenPrintModal,
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [maxStepReached, setMaxStepReached] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [submittedData, setSubmittedData] = useState<PendaftarPPDB | null>(null);
@@ -81,11 +82,13 @@ export const FormPPDBOnline: React.FC<FormPPDBOnlineProps> = ({
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errorMessage) setErrorMessage(null);
   };
 
   const handleCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
     setFormData((prev) => ({ ...prev, [name]: checked }));
+    if (errorMessage) setErrorMessage(null);
   };
 
   // Mock document file upload reader
@@ -128,14 +131,19 @@ export const FormPPDBOnline: React.FC<FormPPDBOnlineProps> = ({
     const error = validateStep(currentStep);
     if (error) {
       setErrorMessage(error);
+      document.getElementById('ppdb-form')?.scrollIntoView({ behavior: 'smooth' });
       return;
     }
-    setCurrentStep((prev) => Math.min(prev + 1, 4));
+    const target = Math.min(currentStep + 1, 4);
+    setCurrentStep(target);
+    setMaxStepReached((prev) => Math.max(prev, target));
+    document.getElementById('ppdb-form')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const prevStep = () => {
     setErrorMessage(null);
     setCurrentStep((prev) => Math.max(prev - 1, 1));
+    document.getElementById('ppdb-form')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -406,14 +414,18 @@ export const FormPPDBOnline: React.FC<FormPPDBOnlineProps> = ({
                 key={st.num}
                 type="button"
                 onClick={() => {
-                  if (st.num < currentStep) setCurrentStep(st.num);
+                  if (st.num <= maxStepReached) {
+                    setErrorMessage(null);
+                    setCurrentStep(st.num);
+                    document.getElementById('ppdb-form')?.scrollIntoView({ behavior: 'smooth' });
+                  }
                 }}
                 className={`flex flex-col items-center p-2.5 sm:p-3 rounded-2xl transition-all ${
                   currentStep === st.num
                     ? 'bg-gradient-to-r from-[#C218A8] to-[#64157D] text-white shadow-md'
-                    : currentStep > st.num
-                    ? 'bg-purple-100 dark:bg-purple-950/60 text-[#64157D] dark:text-purple-300 cursor-pointer'
-                    : 'bg-purple-50/70 dark:bg-[#250D33]/60 text-neutral-400'
+                    : st.num <= maxStepReached
+                    ? 'bg-purple-100 dark:bg-purple-950/60 text-[#64157D] dark:text-purple-300 cursor-pointer hover:bg-purple-200'
+                    : 'bg-purple-50/70 dark:bg-[#250D33]/60 text-neutral-400 cursor-not-allowed'
                 }`}
               >
                 <span className="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs mb-1 bg-white/20">

@@ -26,6 +26,10 @@
 
 /* Print styles for Registration Slip / Kartu Pendaftaran */
 @media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
   body * {
     visibility: hidden;
   }
@@ -38,9 +42,10 @@
     top: 0;
     width: 100%;
     margin: 0;
-    padding: 20px;
-    background: white !important;
-    color: black !important;
+    padding: 24px;
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
   }
   .no-print {
     display: none !important;
